@@ -1,0 +1,13 @@
+split:
+  test_size: 0.2
+  random_state: 42
+
+data:
+  raw: data/raw/ames.csv
+  train: data/processed/train.csv
+  test: data/processed/test.csv
+
+model:
+  depth: 8
+  learning_rate: 0.1
+  iterations: 500
