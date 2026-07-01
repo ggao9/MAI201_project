@@ -1,39 +1,73 @@
-Ames Housing – DVC Pipeline & MLflow Experiment Tracking
-Author: Guangyuan Gao
-Course: MLOps
-Date: 2026‑06‑30
+# House Price Prediction
 
-1. Project Overview
-This repository implements a fully reproducible machine learning pipeline using:
+An end-to-end Machine Learning Operations (MLOps) pipeline for predicting residential property prices using the Ames Housing dataset. This project demonstrates reproducible data versioning, experiment tracking, automated model training, and evaluation using industry-standard MLOps tools.
 
-DVC for data versioning and pipeline automation
+---
 
-MLflow for experiment tracking
+## Overview
 
-CatBoost for model training
+This repository implements a production-oriented machine learning workflow that emphasizes reproducibility, automation, and experiment management.
 
-YAML configuration for parameter management
+The pipeline includes:
 
-The pipeline trains a regression model on the Ames Housing dataset and evaluates its performance using RMSE and MAE.
+- Data preparation
+- Feature preprocessing
+- Model training
+- Model evaluation
+- Experiment tracking with MLflow
+- Data and model versioning with DVC
+- Configuration-driven experimentation
 
-All experiments are logged automatically to MLflow, and all artifacts are tracked by DVC.
+The objective is to build a repeatable workflow where datasets, model artifacts, metrics, and experiments remain fully reproducible throughout the machine learning lifecycle.
 
-2. Repository Structure
-Code
-mlopsproject/
+---
+
+## Architecture
+
+<p align="center">
+  <img src="images/pipeline-diagram.png" width="900" alt="Pipeline Architecture">
+</p>
+
+The pipeline follows the workflow below:
+
+```text
+                Raw Dataset
+                     │
+                     ▼
+            Data Preparation
+                     │
+                     ▼
+          Feature Engineering
+                     │
+                     ▼
+          Model Training
+             (CatBoost)
+                     │
+          ┌──────────┴──────────┐
+          ▼                     ▼
+    Model Artifact         Evaluation
+          │                     │
+          └──────────┬──────────┘
+                     ▼
+        DVC + MLflow Tracking
+```
+
+---
+
+## Repository Structure
+
+```text
+house-price-prediction/
 │
 ├── data/
 │   ├── raw/
-│   │   └── ames.csv
 │   └── processed/
-│       ├── train.csv
-│       └── test.csv
+│
+├── images/
 │
 ├── models/
-│   └── catboost_model.cbm
 │
 ├── reports/
-│   └── metrics.json
 │
 ├── src/
 │   ├── prepare.py
@@ -43,151 +77,189 @@ mlopsproject/
 ├── params.yaml
 ├── dvc.yaml
 ├── dvc.lock
+├── requirements.txt
 └── README.md
-This structure follows standard MLOps conventions: clean separation of data, code, models, and configuration.
+```
 
-3. Installation & Setup
-Clone the repository
-Code
-git clone <your-repo-url>
-cd mlopsproject
-Create environment
-Code
-conda create -n mlops python=3.10 -y
-conda activate mlops
-Install dependencies
-Code
+---
+
+## Technology Stack
+
+| Component | Technology |
+|-----------|------------|
+| Language | Python |
+| Model | CatBoost |
+| Experiment Tracking | MLflow |
+| Data Versioning | DVC |
+| Configuration | YAML |
+| Version Control | Git |
+
+---
+
+## Dataset
+
+**Dataset**
+
+House Prices: Advanced Regression Techniques
+
+**Source**
+
+https://www.kaggle.com/c/house-prices-advanced-regression-techniques
+
+**Target Variable**
+
+```
+SalePrice
+```
+
+The dataset contains numerical and categorical attributes describing residential properties in Ames, Iowa. The objective is to predict the final sale price of each property.
+
+---
+
+## Pipeline
+
+The pipeline consists of three reproducible stages.
+
+### Data Preparation
+
+- Load raw dataset
+- Clean missing values
+- Split train and test datasets
+- Save processed data
+
+### Model Training
+
+- Read hyperparameters from `params.yaml`
+- Train CatBoost model
+- Save trained model
+- Log experiment metadata
+
+### Evaluation
+
+- Generate predictions
+- Calculate evaluation metrics
+- Store metrics
+- Log results to MLflow
+
+---
+
+## Running the Pipeline
+
+Clone the repository.
+
+```bash
+git clone https://github.com/yourusername/house-price-prediction.git
+
+cd house-price-prediction
+```
+
+Install dependencies.
+
+```bash
 pip install -r requirements.txt
-Initialize DVC
-Code
-dvc init
-Start MLflow UI
-Code
+```
+
+Run the complete pipeline.
+
+```bash
+dvc repro
+```
+
+Launch MLflow.
+
+```bash
 mlflow ui
-Open in browser:
+```
 
-Code
-http://127.0.0.1:5000
-4. DVC Pipeline
-The pipeline consists of three stages:
+---
 
-Stage 1 — prepare
-Loads raw data
+## Configuration
 
-Drops ID column
+Pipeline parameters are managed through
 
-Fills missing categorical values
+```text
+params.yaml
+```
 
-Splits into train/test
+This enables reproducible experimentation without modifying application code.
 
-Saves processed CSVs
+---
 
-Stage 2 — train
-Loads processed training data
+## Experiment Tracking
 
-Detects categorical features
+MLflow is used to record
 
-Trains CatBoost model
+- Parameters
+- Metrics
+- Model artifacts
+- Experiment history
 
-Logs parameters, metrics, and model artifact to MLflow
+Each pipeline execution produces a fully traceable experiment for comparison and reproducibility.
 
-Saves model to models/catboost_model.cbm
+---
 
-Stage 3 — evaluate
-Loads trained model
+## Data Versioning
 
-Predicts on test set
+DVC manages
 
-Computes RMSE and MAE
+- Raw datasets
+- Processed datasets
+- Trained models
+- Evaluation reports
 
-Saves metrics to reports/metrics.json
+Versioning data independently of Git ensures reproducible machine learning experiments while keeping the repository lightweight.
 
-Run the full pipeline
-Code
-dvc repro
-5. MLflow Experiment Tracking
-Experiment: ames-catboost
-Three runs were executed by modifying params.yaml:
+---
 
-Run 1 – Baseline
-Code
-depth: 6
-learning_rate: 0.1
-iterations: 300
-Run 2 – Experiment 1
-Code
-depth: 8
-learning_rate: 0.1
-iterations: 300
-Run 3 – Experiment 2
-Code
-depth: 6
-learning_rate: 0.05
-iterations: 500
-Each run logs:
+## Model
 
-Parameters
+The project uses **CatBoost Regressor**, which provides:
 
-RMSE
+- Native support for categorical features
+- Minimal preprocessing requirements
+- Strong regression performance
+- Efficient handling of missing values
+- Reduced overfitting through ordered boosting
 
-MAE
+---
 
-Model artifact
+## Evaluation
 
-Screenshot: MLflow Experiment List
-[Insert screenshot here]
+The model is evaluated using standard regression metrics.
 
-Screenshot: MLflow Run Details
-[Insert screenshot here]
+- RMSE
+- MAE
+- R² Score
 
-6. Metrics Output
-The evaluation stage produces:
+Evaluation reports are stored in
 
-Code
+```text
 reports/metrics.json
-Example:
+```
 
-json
-{
-  "rmse": 24567.12,
-  "mae": 16789.44
-}
-These values change depending on the parameter settings in params.yaml.
+---
 
-7. Reproducibility
-This project is fully reproducible because:
+## Future Work
 
-All data transformations are deterministic
+Planned improvements include
 
-All parameters are stored in params.yaml
+- CI/CD with GitHub Actions
+- Docker support
+- FastAPI model serving
+- Model registry
+- Drift detection
+- Automated retraining
+- Cloud deployment
+- Monitoring and alerting
 
-All pipeline steps are defined in dvc.yaml
+---
 
-All artifacts are tracked in dvc.lock
+## License
 
-All experiments are logged in MLflow
+This project is licensed under the MIT License.
 
-To reproduce any experiment:
+---
 
-Edit params.yaml
+## **Prepared by:** 
 
-Run:
-
-Code
-dvc repro
-View results in MLflow UI
-
-8. Summary
-This project demonstrates:
-
-How to build a complete ML pipeline using DVC
-
-How to track experiments with MLflow
-
-How to manage parameters with YAML
-
-How to train and evaluate a CatBoost model
-
-How to maintain reproducibility across multiple runs
-
-This README provides all documentation required for the assignment.
+Gao-Ali-Suhayel
